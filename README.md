@@ -96,7 +96,7 @@ HVAC-Controls-Lab/
 └── screenshots/          # UI captures for documentation
 ```
 
-Once the code is committed, document here:
+Need To Do: Once the code is committed, document here:
 
 - Required Python/runtime version and dependencies.
 - The exact install and local launch commands.
@@ -106,7 +106,7 @@ Once the code is committed, document here:
 
 ## Screenshots
 
-Add project screenshots to a `screenshots/` folder and uncomment/update these links once committed:
+Need To Do: Add project screenshots to a `screenshots/` folder and uncomment/update the links:
 
 <!--
 ![AHU workbench](screenshots/ahu-workbench.png)

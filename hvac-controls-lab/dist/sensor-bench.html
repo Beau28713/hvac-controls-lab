@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Configure virtual HVAC field sensors and run repeatable Modbus TCP tests against a TM172 bench PLC.">
+<title>Virtual Sensor Bench · HVAC Controls Lab</title>
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./sensor-bench.css">
+<script type="module" src="./sensor-bench.mjs"></script>
+</head>
+<body>
+<header class="masthead sensor-header">
+  <a href="./" class="brand"><span class="brand-icon" aria-hidden="true">⌁</span><span>HVAC Controls Lab<small>OEM APPLICATIONS WORKBENCH</small></span></a>
+  <div class="mast-right"><a href="./" class="bench-shortcut">← Sequence simulator</a><span class="mast-divider"></span><span class="mode-label"><span class="dot"></span> <span id="bridgeMode">MAP EDITOR</span></span></div>
+</header>
+<main class="sensor-main">
+  <div class="sensor-hero">
+    <div><div class="eyebrow"><span>TM172PDG</span><span class="eyebrow-line"></span> HARDWARE IN THE LOOP</div><h1>Virtual sensor bench</h1><p>Drive your PLC project with configurable HVAC analog values and digital contacts. Set them by hand, run a timed test, or let the PLC’s commands drive the response.</p></div>
+    <div class="hero-actions">
+      <a href="./tm172-bench-kit.zip" id="downloadKit" class="button primary" download>Download Windows bench kit</a>
+      <a href="./PLC-SETUP.txt" class="button secondary" download>PLC setup guide</a>
+    </div>
+  </div>
+  <section class="panel sensor-connection" aria-labelledby="connectionTitle">
+    <div class="panel-head"><div><div class="panel-kicker">MODBUS TCP · PORT 502</div><h2 id="connectionTitle">Project connection</h2></div><span id="runBadge" class="status-chip idle"><span class="dot"></span><span>OFFLINE</span></span></div>
+    <div class="connection-body">
+      <p id="localHint" class="sensor-hint">Build a map here, then download and extract the bench kit on the PLC laptop. Run <code>Start-TM172-Bench.cmd</code> and import your saved map. The local app connects to the isolated PLC network.</p>
+      <fieldset id="connectionFields">
+        <legend class="sr">Controller connection and project name</legend>
+        <label>Project name<input id="projectName" value="TM172 HVAC bench" maxlength="80"></label>
+        <label>PLC IPv4 address<input id="sensorHost" placeholder="PLC address" autocomplete="off"></label>
+        <label>Unit ID<input id="sensorUnit" type="number" min="1" max="255" step="1" value="1"></label>
+        <label>Heartbeat address<input id="sensorHeartbeat" type="number" min="1" max="65536" step="1" placeholder="Project address"></label>
+      </fieldset>
+      <p class="sensor-hint">Use the one-based Address column in Machine Expert – HVAC. Each mapped point uses one signed INT holding register. The PLC watchdog must use a separate heartbeat register.</p>
+      <div class="bench-command">
+        <div class="command-controls">
+          <button id="mapRead" class="button secondary" disabled>Read project map</button>
+          <button id="testStart" class="button primary" disabled>Start test</button>
+          <button id="testStop" class="button stop" disabled>Stop test</button>
+        </div>
+        <label class="sensor-confirm"><input id="testConfirm" type="checkbox" disabled> Equipment disconnected. I verified the bench tags and PLC watchdog.</label>
+      </div>
+      <div id="sensorStatus" class="sensor-status" role="status" aria-live="polite">Download the local kit to connect to your PLC.</div>
+    </div>
+  </section>
+  <section class="sensor-workspace" aria-labelledby="sensorTitle">
+    <div class="sensor-workhead">
+      <div><div class="panel-kicker">FIELD SIGNALS</div><h2 id="sensorTitle">Sensor channels</h2><p id="mapCount"></p></div>
+      <div class="sensor-tools">
+        <button id="addAnalog" class="button secondary">+ Analog</button><button id="addDigital" class="button secondary">+ Digital</button>
+        <button id="exportMap" class="button secondary">Save map</button><button id="importMap" class="button secondary">Load map</button>
+        <input id="mapFile" type="file" accept="application/json,.json" hidden>
+      </div>
+    </div>
+    <div class="sensor-grid" id="sensorCards"></div>
+  </section>
+  <section class="panel sensor-guide" aria-labelledby="guideTitle">
+    <div class="panel-head"><div><div class="panel-kicker">PLC PROJECT</div><h2 id="guideTitle">Bring the bench into Machine Expert – HVAC</h2></div></div>
+    <div class="connection-body">
+      <p>Create dedicated writable Status Variables for the simulated values, optional quality flags, and heartbeat. Mirror output commands into separate Status Variables for the bench to read. Use your PLC-local permit and watchdog to select which values your sequence consumes.</p>
+      <p>For a first closed-loop test, map Fan proof to an input tag, set it to follow a mapped fan run command, and set its on delay to 2 seconds. With the bench active, flip its quality switch if your project handles an invalid feedback signal.</p>
+      <div class="sensor-tools"><a class="button secondary" href="./TM172-Selector.st" download>Download ST selector example</a><a class="button secondary" href="./#bench">Single-point temperature tool</a></div>
+    </div>
+  </section>
+  <footer><span>Bench writes target mapped test words. Physical AI/DI wiring and raw input scaling are exercised separately.</span><a href="#sensorTitle">Back to channels ↑</a></footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,99 @@
+HVAC CONTROLS LAB / VIRTUAL SENSOR BENCH
+=======================================
+
+RUN THE KIT
+1. Extract the entire ZIP. On the laptop connected to the isolated bench
+   network, run Start-TM172-Bench.cmd (Python 3.9+). On macOS/Linux, run
+   python3 start_bench.py. The bridge uses the Python standard library.
+2. Keep physical equipment disconnected. Enable the PLC's Ethernet and
+   Modbus TCP server. Use the actual private IPv4 address, unit ID, and
+   the bench laptop's matching subnet. The bridge uses TCP port 502.
+3. The local app opens in your browser. Enter the mapping described below.
+   Save map creates a local JSON file for reuse with the same project.
+
+CREATE THE PLC MAP
+Use a bench copy of the EcoStruxure Machine Expert – HVAC project. Under
+Configuration > Modbus Objects > Status Variables, create single-word
+signed INT tags with scale 1 and offset 0. Record each project's Address
+column value. Enter those one-based numbers in the bench. The bridge
+subtracts one on the wire. Avoid HMI address prefixes. Use dedicated
+Status Variables for test writes.
+
+  Writable input value: Sim_SAT, Sim_RH, Sim_Static, Sim_FilterDP, etc.
+  Writable digital value: Sim_FanProof, Sim_Occupied, Sim_FreezeOK, etc.
+  Optional writable quality: Sim_SAT_Good (1 good, 0 bad).
+  Writable heartbeat: BenchHeartbeat (unique signed INT, range 0..32767).
+  Read-only command mirror: Bench_FanRun (0 or 1) or Bench_FanSpeedCmd
+  (e.g. 0..1000 raw for a 0.0..100.0 percent speed reference).
+
+Set each INT's allowed range to include its raw test values. A digital
+contact writes 0 for open and 1 for closed. Choose tag names and apply
+polarity according to your existing logic. An analog value is multiplied
+by counts per unit and rounded to a signed INT. For example, 72.5 °F with
+10 counts per unit sends 725. Set the PLC conversion to divide by the same
+factor. All test values, quality words, and heartbeat must have unique
+addresses. Command mirrors can be shared as read-only inputs to the bench.
+
+PLC SELECTOR
+Use TM172-Selector.st as a starting point. Declare the non-retentive
+selector variables in your project, link BenchPermit_Local to a PLC-local
+bench control that starts OFF, and call the selector each scan before the
+sequence. Keep the real input scaling and hardwired safety circuits
+functional. Use the effective temperature, quality, and contact values
+in the testable sequence. Confirm the exact tags, units, ranges, polarity,
+initialization, and fallback behavior in your project before downloading.
+
+Each verified bench scan advances the heartbeat. The example copies the
+new values on that heartbeat edge so the logic sees a verified snapshot.
+With the example watchdog, the PLC returns to its physical input path after
+six seconds without a fresh heartbeat. Turn off the PLC-local permit at
+the end of every test. Closing or stopping the app leaves the last test
+words in the controller. A Stop request ends future scans after any
+in-flight scan. The PLC watchdog controls when the simulated values stop
+being selected.
+
+WORK THROUGH THE FIRST TEST
+1. Leave the PLC-local permit OFF. Map one sensor, one heartbeat, and any
+   feedback or quality addresses in the local app.
+2. Click Read project map. This reads registers without writing. Compare
+   the addresses and values with Online Watch. A successful read verifies
+   communication, while the project and Online Watch establish tag identity.
+3. Confirm the isolated bench and start a test. Watch raw values and the
+   heartbeat change in Online Watch. Enable the PLC-local permit and
+   verify BenchActive and the effective sensor values.
+4. Test loss of communication. Stop the test and confirm BenchActive
+   drops when the watchdog expires. Then turn the local permit OFF.
+
+CHANNEL BEHAVIORS
+Manual: use the slider, numeric value, or contact button while running.
+Timed profile: rows contain seconds, value, step/ramp, and good/bad. Start
+at zero. Each ramp ends at that row's time and starts at the previous
+row. A step applies at its specified time. Digital profiles use steps.
+A bad-quality row requires a mapped quality word. A profile holds its
+last value until Stop. Example for a supply temperature sensor:
+    0, 55, step, good
+    12, 65, ramp, good
+    20, 65, step, bad
+    30, 55, step, good
+
+PLC command: a digital contact follows a zero/nonzero command with
+separate on/off delays and optional inversion. An analog response maps
+the command's raw low/high values to sensor min/max, with optional lag.
+Force manual value can temporarily override a timed or following point.
+With a quality word mapped, Sensor good can inject an invalid signal
+independently from the value. A mapped quality word tests the PLC
+application's bad-sensor logic downstream of the physical input.
+
+Example: map Supply fan proof to Sim_FanProof and follow Bench_FanRun
+with 2 seconds on delay. When the PLC requests the fan, the bench returns
+proof. During the run, force a manual open contact to test loss of proof.
+
+The kit supports up to 16 mapped sensors. It verifies writes by reading
+the test words, writes changed values, and advances the heartbeat only
+after their readback succeeds. A protocol error, readback mismatch, or
+lost browser connection stops the run. Use a new map read before restarting.
+
+SCHNEIDER REFERENCES
+  https://www.se.com/us/en/download/document/EIO0000003412/
+  https://www.se.com/us/en/download/document/EIO0000002015/
+  https://www.se.com/us/en/faqs/FAQ000255879/

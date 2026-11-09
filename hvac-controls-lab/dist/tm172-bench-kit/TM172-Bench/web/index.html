@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b1423">
+<meta name="description" content="A private HVAC sequence and commissioning simulator for OEM applications engineering.">
+<title>HVAC Controls Lab</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2349d3ed'/%3E%3Cpath d='M5 16h5l3-7 5 14 3-7h6' fill='none' stroke='%230b1423' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="./styles.css">
+<script type="module" src="./app.mjs"></script>
+<script type="module" src="./bench.mjs"></script>
+</head>
+<body>
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 12h5l3-7 4 14 3-7h5"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="currentColor"/><circle cx="15" cy="17" r="2" fill="currentColor"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 4v16h18M6 15l5-5 4 3 5-6"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-chip" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M9 2v3m6-3v3M9 19v3m6-3v3M2 9h3m-3 6h3m14-6h3m-3 6h3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 12 7-12 7z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14m6-14v14" stroke-width="3"/></symbol>
+  <symbol id="i-step" viewBox="0 0 24 24"><path d="m5 5 11 7-11 7zM19 5v14"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 3 6.7M3 5v7h7"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5zm-9 9 9 5 9-5m-18 4 9 5 9-5"/></symbol>
+  <symbol id="i-temp" viewBox="0 0 24 24"><path d="M9 14V5a3 3 0 0 1 6 0v9a5 5 0 1 1-6 0Zm3-4v7m5-11h3m-3 4h3"/><circle cx="12" cy="18" r="1"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 4-4 7-8 9-4-2-8-5-8-9V6zm-3 9 2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M6 18 18 6M8 6h10v10"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M6 12h12"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></symbol>
+</svg>
+<header class="masthead">
+  <a href="#workbench" class="brand"><span class="brand-icon"><svg class="icon"><use href="#i-wave"/></svg></span><span>HVAC Controls Lab<small>OEM APPLICATIONS WORKBENCH</small></span></a>
+  <div class="mast-right"><a href="./sensor-bench.html" class="bench-shortcut"><svg class="icon"><use href="#i-chip"/></svg> Virtual sensors</a><span class="mast-divider"></span><span class="access" id="accessLabel"><svg class="icon"><use href="#i-lock"/></svg> <span>Private lab</span></span><span class="mast-divider"></span><span class="mode-label"><span class="dot"></span> SIMULATION</span></div>
+</header>
+<div class="shell">
+  <aside class="sidebar">
+    <p class="rail-label">WORKSPACE</p>
+    <nav aria-label="Workspace sections">
+      <a href="#workbench" class="nav-link active" aria-current="location"><svg class="icon"><use href="#i-grid"/></svg>Workbench</a>
+      <a href="#io" class="nav-link"><svg class="icon"><use href="#i-sliders"/></svg>I/O points</a>
+      <a href="#trends" class="nav-link"><svg class="icon"><use href="#i-chart"/></svg>Trends</a>
+      <a href="#sequence" class="nav-link"><svg class="icon"><use href="#i-list"/></svg>Sequence</a>
+      <a href="#alarms" class="nav-link"><svg class="icon"><use href="#i-bell"/></svg>Alarms &amp; events <span id="navAlarms" class="nav-count" hidden></span></a>
+      <a href="./sensor-bench.html" class="nav-link"><svg class="icon"><use href="#i-chip"/></svg>Virtual sensors</a>
+    </nav>
+    <div class="profile-card">
+      <div class="profile-kicker"><svg class="icon"><use href="#i-chip"/></svg> CONTROLLER PROFILE</div>
+      <label for="profile" class="sr">Controller profile</label>
+      <select id="profile"><option>TM171</option><option selected>TM172</option><option>TM173</option><option>TM262</option></select>
+      <p id="profileTool" class="profile-tool"></p>
+      <p id="profileFocus"></p>
+      <a id="profileDoc" target="_blank" rel="noopener noreferrer">Controller reference <svg class="icon"><use href="#i-arrow"/></svg></a>
+    </div>
+    <div class="rail-bottom"><span class="dot"></span> Local simulation engine<small>Training model · 1 s scan</small></div>
+  </aside>
+  <main id="workbench">
+    <div class="page-head">
+      <div><div class="eyebrow"><span id="assetTag">AHU-01</span><span class="eyebrow-line"></span> SEQUENCE WORKBENCH</div><h1 id="title">Air handling unit</h1><p id="subTitle">Supply air temperature control with an integrated economizer.</p></div>
+      <div class="transport" aria-label="Simulation controls">
+        <div class="clock"><span id="runStatus">PAUSED</span><strong id="time">00:00:00</strong></div>
+        <label class="sr" for="rate">Simulation speed</label><select id="rate" title="Simulation speed"><option value="1">1×</option><option value="5">5×</option><option value="20">20×</option></select>
+        <button id="restart" class="icon-btn" title="Restart scenario" aria-label="Restart scenario"><svg class="icon"><use href="#i-reset"/></svg></button>
+        <button id="step" class="button secondary" title="Pause and advance one scan"><svg class="icon"><use href="#i-step"/></svg><span>Step</span></button>
+        <button id="run" class="button primary"><svg class="icon"><use href="#i-play"/></svg><span>Run</span></button>
+      </div>
+    </div>
+    <div class="scenario-bar">
+      <div class="scenario-pick"><svg class="icon"><use href="#i-layers"/></svg><label for="scenario">SCENARIO</label><select id="scenario"></select></div>
+      <p id="scenarioBrief"></p>
+    </div>
+    <div class="metrics" id="metrics"></div>
+    <div class="work-grid">
+      <section id="process" class="panel process-panel" aria-labelledby="processTitle">
+        <div class="panel-head"><div><div class="panel-kicker">EQUIPMENT</div><h2 id="processTitle">Process schematic</h2></div><span id="processBadge" class="status-chip"><span class="dot"></span><span></span></span></div>
+        <div id="schematic" class="schematic"></div>
+        <div id="equipment" class="equipment"></div>
+      </section>
+      <section id="io" class="panel io-panel" aria-labelledby="ioTitle">
+        <div class="panel-head"><div><div class="panel-kicker">FIELD SIGNALS</div><h2 id="ioTitle">I/O points</h2></div><span class="small-label">SIMULATED</span></div>
+        <div class="tabs" role="tablist" aria-label="Signal types">
+          <button id="analog-tab" role="tab" aria-controls="analog" aria-selected="true">Analog inputs</button>
+          <button id="digital-tab" role="tab" aria-controls="digital" aria-selected="false" tabindex="-1">Digital inputs <span id="digitalCount"></span></button>
+        </div>
+        <div id="analog" class="io-body" role="tabpanel" aria-labelledby="analog-tab"></div>
+        <div id="digital" class="io-body" role="tabpanel" aria-labelledby="digital-tab" hidden></div>
+      </section>
+      <section id="trends" class="panel trend-panel" aria-labelledby="trendTitle">
+        <div class="panel-head"><div><div class="panel-kicker">SIGNAL HISTORY</div><h2 id="trendTitle">Live trends</h2></div><span class="small-label">120 S WINDOW</span></div>
+        <div id="chart" class="chart"></div>
+        <div id="legend" class="legend" aria-label="Trend series"></div>
+      </section>
+      <section id="sequence" class="panel sequence-panel" aria-labelledby="sequenceTitle">
+        <div class="panel-head"><div><div class="panel-kicker">CONTROL LOGIC</div><h2 id="sequenceTitle">Sequence of operations</h2></div><span class="small-label">LIVE STATE</span></div>
+        <ol id="sequenceList"></ol>
+      </section>
+      <section class="panel perm-panel" aria-labelledby="permTitle">
+        <div class="panel-head"><div><div class="panel-kicker">INTERLOCKS</div><h2 id="permTitle">Permissives</h2></div><span id="permCount" class="small-label"></span></div>
+        <ul id="permissives"></ul>
+        <p class="panel-note">Startup conditions and proof feedback are shown separately. A missing proof is expected before equipment starts.</p>
+      </section>
+      <section id="alarms" class="panel alarm-panel" aria-labelledby="alarmTitle">
+        <div class="panel-head"><div><div class="panel-kicker">DIAGNOSTICS</div><h2 id="alarmTitle">Alarms &amp; events</h2></div><span id="alarmCount" class="small-label"></span></div>
+        <div class="alarm-content"><div id="activeAlarms" aria-live="polite"></div><div class="alarm-actions"><button id="ack" class="button secondary">Acknowledge all</button><button id="clearAlarms" class="button secondary">Reset alarms</button></div><p id="alarmHint" class="panel-note">Restore the field condition before resetting a latched trip.</p></div>
+        <h3 class="event-heading">EVENT HISTORY</h3><ol id="events"></ol>
+      </section>
+    </div>
+    <section id="bench" class="panel bench-panel" aria-labelledby="benchTitle">
+      <div class="panel-head"><div><div class="panel-kicker">HARDWARE BENCH · MODBUS TCP</div><h2 id="benchTitle">TM172PDG temperature injection</h2></div><span id="benchBadge" class="status-chip idle"><span class="dot"></span> LOCAL KIT REQUIRED</span></div>
+      <div class="bench-body">
+        <p class="bench-intro"><a href="./sensor-bench.html" class="bench-shortcut">Open the multi-sensor bench ↗</a></p>
+        <p class="bench-intro">Send a simulated temperature to one writable PLC Status Variable. Your PLC application can select that value in place of the scaled AI1 reading when its local bench permit is enabled.</p>
+        <div id="benchInstall" class="bench-install">
+          <ol class="bench-steps">
+            <li><strong>Download and extract</strong><span>Put the kit on the laptop connected to your TM172PDG bench network.</span></li>
+            <li><strong>Start the local bridge</strong><span>On Windows, open <code>Start-TM172-Bench.cmd</code>. Requires Python 3.9 or later.</span></li>
+            <li><strong>Read, then send</strong><span>Enter the PLC IP, unit ID, and Status Variable address in the browser window the bridge opens.</span></li>
+          </ol>
+          <a class="button primary" href="./tm172-bench-kit.zip" download>Download TM172 bench kit <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <p class="panel-note">The bridge serves the lab on your laptop and communicates with the PLC over Ethernet on TCP port 502.</p>
+        </div>
+        <form id="benchForm" hidden>
+          <fieldset id="benchFields"><legend class="sr">PLC target and simulated temperature</legend>
+            <div class="bench-settings">
+              <label for="plcHost">PLC IPv4 address<input id="plcHost" type="text" placeholder="10.0.0.100" inputmode="decimal" autocomplete="off" required></label>
+              <label for="plcUnit">Modbus unit ID<input id="plcUnit" type="number" min="1" max="255" value="1" step="1" required></label>
+              <label for="plcRegister">Project address<input id="plcRegister" type="number" min="1" max="65536" placeholder="Status Variable address" step="1" required></label>
+              <label for="plcUnits">PLC temperature units<select id="plcUnits"><option value="F">°F</option><option value="C">°C</option></select></label>
+            </div>
+            <p id="benchAddressHint" class="panel-note">Use the Address column from Machine Expert – HVAC. The bridge subtracts one to obtain the Modbus offset.</p>
+            <div class="bench-temperature">
+              <div class="bench-temp-label"><label for="benchTemp">Simulated AI1 temperature</label><span><input id="benchTemp" type="number" min="-40" max="180" step="0.1" value="72.5" required> °F</span></div>
+              <input id="benchSlider" type="range" aria-label="Simulated AI1 temperature slider" min="-40" max="180" step="0.1" value="72.5">
+              <p id="benchEncoding" class="panel-note"></p>
+            </div>
+            <label class="bench-arm"><input id="benchArm" type="checkbox" disabled> Equipment disconnected. I verified this is the dedicated writable test variable.</label>
+            <div class="bench-actions">
+              <button type="button" class="button secondary" id="benchRead">Read register</button>
+              <button type="submit" class="button primary" id="benchSend" disabled>Send temperature</button>
+            </div>
+          </fieldset>
+          <p id="benchResult" class="bench-result" role="status" aria-live="polite">Read the Status Variable to verify the connection and mapping before enabling writes.</p>
+        </form>
+        <details class="bench-guide">
+          <summary>PLC setup and AI1 selector example</summary>
+          <ol>
+            <li>In a bench copy of the project, enable the TM172PDG Modbus TCP server. In <strong>Configuration → Modbus Objects → Status Variables</strong>, add <code>SimAI1_Tenths</code> as a writable <code>INT</code> with scale 1 and offset 0. Record its project address.</li>
+            <li>Keep your real AI1 mapping and sensor scaling. Use a separate <code>AI1_Used</code> value in the sequence, in the same units as <code>AI1_Eng</code> and the configured Modbus point. The PLC-local bench permit starts off.</li>
+          </ol>
+          <pre><code>AI1_Used := AI1_Eng;
+IF BenchPermit_Local THEN
+    AI1_Used := INT_TO_REAL(SimAI1_Tenths) / 10.0;
+END_IF;</code></pre>
+          <p>With equipment disconnected, confirm the raw register value in Online Watch before turning on the PLC bench permit. Turn the permit off when finished. The PLC retains the last test value when you close the browser.</p>
+          <a href="https://www.se.com/us/en/download/document/EIO0000003412/" target="_blank" rel="noopener noreferrer">Schneider Electric operating guide <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </details>
+      </div>
+    </section>
+    <footer><span><svg class="icon"><use href="#i-info"/></svg> Workbench scans, timing, and I/O are simulated. TM172 bench writes are initiated separately.</span><a href="#workbench">Back to top ↑</a></footer>
+  </main>
+</div>
+</body>
+</html>
